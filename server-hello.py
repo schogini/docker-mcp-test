@@ -13,17 +13,17 @@ import sys
 import aiofiles
 
 # Replace the log_data function with
-# async def log_data(data: bytes, direction: str) -> None:
-#     """Log to both file and stdout"""
-#     line = f"[{direction}] {data.decode().strip()}\n"
-#     async with aiofiles.open("/app/logs/logs.txt", "a") as f:
-#         await f.write(line)
-#     sys.stdout.write(line)  # Also show in container stdout
-#     sys.stdout.flush()
+async def log_data(data: bytes, direction: str) -> None:
+    """Log to both file and stdout"""
+    line = f"[{direction}] {data.decode().strip()}\n"
+    async with aiofiles.open("/app/logs/logs.txt", "a") as f:
+        await f.write(line)
+    sys.stdout.write(line)  # Also show in container stdout
+    sys.stdout.flush()
 
     
-# DEFAULT_USER_AGENT_AUTONOMOUS = "ModelContextProtocol/1.0 (Autonomous; +https://github.com/modelcontextprotocol/servers)"
-# DEFAULT_USER_AGENT_MANUAL = "ModelContextProtocol/1.0 (User-Specified; +https://github.com/modelcontextprotocol/servers)"
+DEFAULT_USER_AGENT_AUTONOMOUS = "ModelContextProtocol/1.0 (Autonomous; +https://github.com/modelcontextprotocol/servers)"
+DEFAULT_USER_AGENT_MANUAL = "ModelContextProtocol/1.0 (User-Specified; +https://github.com/modelcontextprotocol/servers)"
 
 # class Logger:
 #     def __init__(self, filename):
@@ -42,7 +42,7 @@ import aiofiles
 
 async def main():
     # Open the log file in write mode
-    # log_file = open("/app/logs/logs.txt", "w")
+    log_file = open("/app/logs/logs.txt", "w")
     # Redirect stdout and stderr to the log file
     # sys.stdout = log_file
     # sys.stderr = log_file
@@ -58,32 +58,25 @@ async def serve() -> None:
     async def list_tools() -> list[Tool]:
         return [
             Tool(
-                name="add-two-numbers",
-                description="A simple tool to add two numbers.",
+                name="hello-world2",
+                description="A simple tool that returns a greeting.",
                 inputSchema={
                     "type": "object",
                     "properties": {
-                        "num1": {
+                        "greeting": {
                             "type": "string",
-                            "description": "first number to add.",
-                        },
-                        "num2": {
-                            "type": "string",
-                            "description": "second number to add.",
+                            "description": "The greeting to return.",
                         }
                     },
-                    "required": ["num1", "num2"],
+                    "required": ["greeting"],
                 },
             )
         ]
 
     @server.call_tool()
     async def call_tool(name, arguments: dict) -> list[TextContent]:
-        num1 = arguments['num1']
-        num2 = arguments['num2']
-        ans = float(num1) + float(num2)
-        return [TextContent(type="text", text=f"{ans}")]
-        # return [TextContent(type="text", text=f"{arguments['greeting']} World!")]
+
+        return [TextContent(type="text", text=f"{arguments['greeting']} World!")]
 
     options = server.create_initialization_options()
     async with stdio_server() as (read_stream, write_stream):
@@ -95,5 +88,4 @@ if __name__ == "__main__":
     # sys.stderr = sys.stdout  # Redirect stderr to the same logger
     print("Starting the MCP Server")
     asyncio.run(main())
-
 
